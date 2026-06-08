@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  user
+  admin
+}
+
+enum LessonStatus {
+  in_progress
+  completed
+}
+
+enum ChallengeDifficulty {
+  easy
+  medium
+  hard
+}
+
+enum SubmissionStatus {
+  pending
+  accepted
+  wrong_answer
+  runtime_error
+}
+
+enum ActivityType {
+  lesson_completed
+  challenge_attempted
+  challenge_accepted
+  streak_updated
+  favorite_added
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      Role     @default(user)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // learning
+  lessonProgresses LessonProgress[]
+  submissions      Submission[]
+  streak           UserStreak?
+  activities       Activity[]
+
+  // favorites
+  favoriteArticles   FavoriteArticle[]
+  favoriteChallenges FavoriteChallenge[]
+}
+
+model Language {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String
+  icon        String
+  guides      Guide[]
+  categories  Category[]
+  challenges  Challenge[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Guide {
+  id         Int      @id @default(autoincrement())
+  title      String
+  content    String
+  languageId Int
+  language   Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([languageId])
+}
+
+model Article {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  favoritedBy FavoriteArticle[]
+}
+
+model DocumentationPage {
+  id        Int      @id @default(autoincrement())
+  title     String
+  slug      String   @unique
+  section   String
+  excerpt   String
+  content   String
+  order     Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([section])
+  @@index([order])
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  // Stored as "name" in the DB for backward compatibility with existing data
+  title      String   @map("name")
+  languageId Int?
+  language   Language? @relation(fields: [languageId], references: [id], onDelete: Cascade)
+  topics    Topic[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([languageId])
+}
+
+model Topic {
+  id          Int      @id @default(autoincrement())
+  title       String
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  order       Int
+  lessons     Lesson[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([categoryId, order])
+  @@index([categoryId])
+}
+
+model Lesson {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  topicId   Int
+  order     Int
+  topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  progresses LessonProgress[]
+
+  @@unique([topicId, order])
+  @@index([topicId])
+}
+
+model LessonProgress {
+  id          Int          @id @default(autoincrement())
+  userId      Int
+  lessonId    Int
+  status      LessonStatus @default(in_progress)
+  startedAt   DateTime     @default(now())
+  completedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([lessonId])
+}
+
+model Challenge {
+  id             Int                 @id @default(autoincrement())
+  title          String
+  description    String
+  difficulty     ChallengeDifficulty
+  starterCode    String
+  expectedOutput String
+  languageId     Int
+  language       Language            @relation(fields: [languageId], references: [id], onDelete: Cascade)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  submissions Submission[]
+  favoritedBy FavoriteChallenge[]
+
+  @@index([languageId])
+  @@index([difficulty])
+}
+
+model Submission {
+  id          Int              @id @default(autoincrement())
+  userId      Int
+  challengeId Int
+  code        String
+  status      SubmissionStatus @default(pending)
+  output      String?
+  error       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([challengeId])
+}
+
+model FavoriteArticle {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  articleId Int
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, articleId])
+  @@index([articleId])
+}
+
+model FavoriteChallenge {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  challengeId Int
+  createdAt   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, challengeId])
+  @@index([challengeId])
+}
+
+model UserStreak {
+  id             Int       @id @default(autoincrement())
+  userId         Int       @unique
+  currentStreak  Int       @default(0)
+  longestStreak  Int       @default(0)
+  lastActivityAt DateTime?
+  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id        Int          @id @default(autoincrement())
+  userId    Int
+  type      ActivityType
+  meta      Json?
+  createdAt DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([type])
+}

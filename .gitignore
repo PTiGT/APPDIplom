@@ -1,5 +1,6 @@
 # macOS
 .DS_Store
+**/.DS_Store
 
 # Xcode user state
 *.xcuserstate
@@ -17,7 +18,23 @@ build/
 *.dSYM.zip
 *.dSYM
 
+# Node / web
+**/node_modules
+**/dist
+**/.prisma
+
 # Secrets and local environment
 .env
 .env.*
 !.env.example
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Документы и заметки по диплому (не публикуются в репозитории)
+/CODE_AND_SYSTEM_IMPLEMENTATION.md
+/BACKEND_PROGRESS.md
+/DATABASE_SCHEMA_DESCRIPTION.md
+/DIPLOM_APPP.docx
+/DIPLOMA_APPENDICES_A_B.md
+/INTERESTING_CODE_PARTS.md

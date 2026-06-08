@@ -1,0 +1,37 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #0b0c10;
+  color: #e5e7eb;
+}
+
+.prose-dark {
+  --tw-prose-body: theme(colors.zinc.200);
+  --tw-prose-headings: theme(colors.zinc.50);
+  --tw-prose-lead: theme(colors.zinc.200);
+  --tw-prose-links: theme(colors.violet.300);
+  --tw-prose-bold: theme(colors.zinc.50);
+  --tw-prose-counters: theme(colors.zinc.400);
+  --tw-prose-bullets: theme(colors.zinc.500);
+  --tw-prose-hr: theme(colors.zinc.800);
+  --tw-prose-quotes: theme(colors.zinc.100);
+  --tw-prose-quote-borders: theme(colors.zinc.800);
+  --tw-prose-captions: theme(colors.zinc.400);
+  --tw-prose-code: theme(colors.zinc.100);
+  --tw-prose-pre-code: theme(colors.zinc.100);
+  --tw-prose-pre-bg: theme(colors.zinc.900);
+  --tw-prose-th-borders: theme(colors.zinc.700);
+  --tw-prose-td-borders: theme(colors.zinc.800);
+}
