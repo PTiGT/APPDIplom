@@ -5,3 +5,14 @@
 **/dist
 **/.DS_Store
 **/.prisma
+
+# Документы и заметки по диплому (не публикуются в репозитории)
+/CODE_AND_SYSTEM_IMPLEMENTATION.md
+/BACKEND_PROGRESS.md
+/DATABASE_SCHEMA_DESCRIPTION.md
+/DIPLOM_APPP.docx
+/DIPLOMA_APPENDICES_A_B.md
+/INTERESTING_CODE_PARTS.md
+/IOS_PROGRESS.md
+/PROJECT_CONTEXT.md
+/RUN_GUIDE.md
